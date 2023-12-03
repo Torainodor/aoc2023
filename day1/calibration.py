@@ -1,37 +1,54 @@
-import re
-
-task = 0
 number_mapping = {
-    'eight': 8, '8': 8,
-    'seven': 7, '7': 7,
+    'one': 1, '1': 1,
+    'two': 2, '2': 2,
     'three': 3, '3': 3,
     'four': 4, '4': 4,
     'five': 5, '5': 5,
-    'nine': 9, '9': 9,
     'six': 6, '6': 6,
-    'one': 1, '1': 1,
-    'two': 2, '2': 2
+    'seven': 7, '7': 7,
+    'eight': 8, '8': 8,
+    'nine': 9, '9': 9
 }
-pattern = re.compile('|'.join(number_mapping.keys()))
+list_pattern = number_mapping.keys()
 
-for line in open('basic.txt'):
-    print(line)
 
-    matches = pattern.finditer(line)
-    leftmost_match = next(matches, None)
-    rightmost_match = None
+def find_forward(line: str, patt: list):  # solves part 1
+    leftmost_index = len(line)
+    current_item = None
 
-    for match in matches:
-        print(match)
-        rightmost_match = match
+    for item in patt:
+        index = line.find(item)
+        if index != -1 and (index is None or index < leftmost_index):
+            leftmost_index = index
+            current_item = item
 
-    if rightmost_match and leftmost_match is not None:
-        leftmost_number = number_mapping[leftmost_match.group()]
-        print("leftmost number is ", leftmost_number)
-        rightmost_number = number_mapping[rightmost_match.group()]
-        print("rightmost_number is ", rightmost_number)
-        line_sum = str(leftmost_number) + str(rightmost_number)
-        print("line_sum is ", line_sum)
-        task += int(line_sum)
-        print("---")
-print(task)
+    return str(number_mapping[str(current_item)])
+
+
+def find_backward(line: str, patt: list):  # required for part2
+    reversed_patt = [item[::-1] for item in patt]
+    reversed_line = line[::-1]
+    rightmost_index = len(reversed_line)
+    current_item = None
+    for item in reversed_patt:
+        index = reversed_line.find(item)
+        if index != -1 and (index is None or index < rightmost_index):
+            rightmost_index = index
+            current_item = item[::-1]
+
+    return str(number_mapping[str(current_item)])
+
+
+file = open("input.txt")
+task = 0
+for string in file:
+    leftmost_num = find_forward(string, list_pattern)
+    rightmost_num = find_backward(string, list_pattern)
+    line_num = leftmost_num + rightmost_num
+    task += int(line_num)
+    print(string)
+    print("Leftmost: " + leftmost_num)
+    print("Rightmost: " + rightmost_num)
+    print("Concatenated line number: " + line_num)
+    print("Current sum: " + str(task))
+    print("---")
